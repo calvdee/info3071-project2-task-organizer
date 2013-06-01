@@ -3,11 +3,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <!-- CONTENT LABEL-->
-        <Style x:Key="ContentLabel" TargetType="{x:Type Label}">
+        
+        <!-- CONTENT LABELS-->
+        <Style x:Key="FormContent" TargetType="{x:Type Label}">
             <Setter Property="FontSize" Value="14"></Setter>
             <Setter Property="FontWeight" Value="Light"></Setter>
             <Setter Property="Grid.ColumnSpan" Value="2"></Setter>
+            <Setter Property="Margin" Value="0 0 5 5"></Setter>
+        </Style>
+
+        <!-- TEXT INPUT -->
+        <Style x:Key="TextInput" TargetType="{x:Type TextBox}">
+            <Setter Property="FontSize" Value="14"></Setter>
+            <Setter Property="FontWeight" Value="Light"></Setter>
+            <Setter Property="Margin" Value="0 0 15 15"></Setter>
+        </Style>
+
+        <!-- DATE INPUT -->
+        <Style x:Key="DateInput" TargetType="{x:Type DatePicker}">
+            <Setter Property="FontSize" Value="14"></Setter>
+            <Setter Property="FontWeight" Value="Light"></Setter>
+            <Setter Property="Margin" Value="0 0 15 15"></Setter>
+        </Style>
+
+        <!-- COMBO INPUT -->
+        <Style x:Key="ComboInput" TargetType="{x:Type ComboBox}">
+            <Setter Property="FontSize" Value="14"></Setter>
+            <Setter Property="FontWeight" Value="Light"></Setter>
+            <Setter Property="Margin" Value="0 0 15 15"></Setter>
         </Style>
 
         <!-- FOR LABEL -->
@@ -18,7 +41,10 @@
         
         <!-- FORM GRID -->
         <Style x:Key="FormGrid" TargetType="{x:Type RowDefinition}">
-            <Setter Property="MaxHeight" Value="30"></Setter>
+            <Setter Property="MaxHeight" Value="40"></Setter>
         </Style>
+        
+        
+        
     </Application.Resources>
 </Application>
