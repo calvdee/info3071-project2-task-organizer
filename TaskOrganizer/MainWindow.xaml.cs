@@ -25,7 +25,6 @@ namespace TaskOrganizer
         private ReadOnlyTaskForm _readOnlyForm;
         private EditableTaskForm _editableTaskForm;
         private TaskFactory _taskFactory = new TaskFactory();
-        private Dictionary<TaskPriority, List<Classes.Task>> _tree;
 
         public MainWindow()
         {
@@ -35,72 +34,25 @@ namespace TaskOrganizer
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _vmTasks = new ViewModel();
-            _vmTasks.TaskCollection.CollectionChanged += TaskCollection_CollectionChanged;
-        }
 
-        /// <summary>
-        /// Handles the addition of new tasks by re-building the tree view.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void TaskCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            treeTasks.Items.Clear();
+            // Each task list represents a different priority
+            List<TaskList> priorities = new List<TaskList>() 
+            { 
+                _vmTasks.TaskMap[TaskPriority.LOW], 
+                _vmTasks.TaskMap[TaskPriority.MEDIUM], 
+                _vmTasks.TaskMap[TaskPriority.HIGH] 
+            };
 
-            // Create a new parent node for each task priority in the TreeCollection.
-            foreach(KeyValuePair<Classes.TaskPriority, List<Classes.Task>> kvp in _vmTasks.TreeCollection)
+            
+            DataContext = new
             {
-                TreeViewItem ndeParent = new TreeViewItem();
-                ndeParent.Header = Enum.GetName(typeof(Classes.TaskPriority), kvp.Key);
-                
-                // Create a new child node for each task in the list and set the context.
-                foreach (Classes.Task task in kvp.Value)
-                {
-                    List<TreeViewItem> ndeChildren = new List<TreeViewItem>()
-                    {
-                        new TreeViewItem(),
-                        new TreeViewItem(),
-                        new TreeViewItem(),
-                        new TreeViewItem(),
-                        new TreeViewItem()
-                    };
-                    TreeViewItem ndeSubParent = new TreeViewItem();
-
-                    // Create the sub parent node and hookup the click handler
-                    ndeSubParent.Header = task;
-                    ndeSubParent.MouseUp += ndeTask_MouseUp;
-
-                    // Create the metadata nodes
-                    ndeChildren.ElementAt(0).Header = "Started: " + task.DateStarted.ToString(Classes.Task.DateFormat);
-                    ndeChildren.ElementAt(1).Header = "Due: " + task.DueDate.ToString(Classes.Task.DateFormat);
-                    ndeChildren.ElementAt(2).Header = "Status: " + Enum.GetName(typeof(Classes.TaskStatus), task.Status);
-
-                    // Add metadata child nodes to the sub parent
-                    ndeChildren.ForEach(c =>
-                    {
-                        ndeSubParent.Items.Add(c);
-                        c.MouseUp += ndeTask_MouseUp;
-                    });
-
-                    // Add the sub parent to the parent
-                    ndeParent.Items.Add(ndeSubParent);
-                }
-
-                // Add to the tree view
-                treeTasks.Items.Add(ndeParent);
-            }
+                Priorities = priorities
+            };
         }
 
         void ndeTask_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            Classes.Task task = null;
-
-            if (sender is Classes.Task)
-                // Clicked on a direct task node.
-                task = sender as Classes.Task;
-            else
-                // Clicked on a metadata node.
-                task = ((object)((sender as TreeViewItem).Parent as TreeViewItem)) as Classes.Task;
+            Classes.Task task = (sender as TextBlock).DataContext as TaskOrganizer.Classes.Task;
         }
 
         /// <summary>
@@ -184,8 +136,8 @@ namespace TaskOrganizer
         }
 
         /// <summary>
-        /// Handles the save by creating a new task object will cause view model events to fire and
-        /// the new task will be renedered in the tree view and persisted to the disk.
+        /// Handles the save by creating a new task object and calling the view model's `SaveTask()`
+        /// method which will add the task to the tree view and persist the updated task list to disk.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

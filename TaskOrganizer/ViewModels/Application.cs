@@ -3,41 +3,36 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using TaskOrganizer.TaskClasses;
 
-namespace TaskOrganizer.Classes
+namespace TaskOrganizer.ViewModels
 {
-    public class ViewModel
+    public class ApplicationViewModel
     {
         public ObservableCollection<Task> TaskCollection { get; private set; }
-        public Dictionary<TaskPriority, TaskList> TaskMap { get; private set; }
+        public Dictionary<TaskPriority, List<Task>> TreeCollection;
         public string[] TaskStatuses { get; private set; }
         public string[] TaskPriorities { get; private set; }
 
-        public ViewModel()
+        public ApplicationViewModel()
         {
             this.TaskCollection = new ObservableCollection<Task>();
-            this.TaskMap = new Dictionary<TaskPriority, TaskList>()
-            {
-                { TaskPriority.LOW, new TaskList(TaskPriority.LOW) },
-                { TaskPriority.MEDIUM, new TaskList(TaskPriority.MEDIUM) },
-                { TaskPriority.HIGH, new TaskList(TaskPriority.HIGH) },
-            };
-
+            this.TreeCollection = new Dictionary<TaskPriority, List<Task>>();
             BuildCombos();
         }
 
-        /// <summary>
-        /// Adds the task to the `TaskMap` collection and persists the task to disk.
-        /// </summary>
-        /// <param name="newTask"></param>
         public void SaveTask(Task newTask)
         {
             TaskPriority priority = newTask.Priority;
 
-            this.TaskMap[priority].Tasks.Add(newTask);
+            if (TreeCollection.ContainsKey(priority))
+                // Append to this priority.
+                this.TreeCollection[priority].Add(newTask);
+            else
+                // No entry for this priority, create and append.
+                this.TreeCollection[priority] = new List<Task>() { newTask };
 
-            //TODO: Save to disk
+            this.TaskCollection.Add(newTask);
         }
 
         /// <summary>
@@ -47,10 +42,10 @@ namespace TaskOrganizer.Classes
         {
             this.TaskStatuses = new string[]
             {
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.CREATED),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.STARTED),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.DONE),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.OVERDUE),
+                Enum.GetName(typeof(TaskStatus), TaskStatus.CREATED),
+                Enum.GetName(typeof(TaskStatus), TaskStatus.STARTED),
+                Enum.GetName(typeof(TaskStatus), TaskStatus.DONE),
+                Enum.GetName(typeof(TaskStatus), TaskStatus.OVERDUE),
             };
 
             this.TaskPriorities = new string[]
