@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace TaskOrganizer.Classes
 {
-    public class ViewModel
+    public class AppViewModel
     {
         public ObservableCollection<Task> TaskCollection { get; private set; }
         public Dictionary<TaskPriority, TaskList> TaskMap { get; private set; }
-        public string[] TaskStatuses { get; private set; }
-        public string[] TaskPriorities { get; private set; }
+        //public string[] TaskStatuses { get; private set; }
+        //public string[] TaskPriorities { get; private set; }
 
-        public ViewModel()
+        public AppViewModel()
         {
             this.TaskCollection = new ObservableCollection<Task>();
             this.TaskMap = new Dictionary<TaskPriority, TaskList>()
@@ -23,8 +23,6 @@ namespace TaskOrganizer.Classes
                 { TaskPriority.MEDIUM, new TaskList(TaskPriority.MEDIUM) },
                 { TaskPriority.HIGH, new TaskList(TaskPriority.HIGH) },
             };
-
-            BuildCombos();
         }
 
         /// <summary>
@@ -40,25 +38,34 @@ namespace TaskOrganizer.Classes
             //TODO: Save to disk
         }
 
-        /// <summary>
-        /// Builds the combo items from the TaskPriorty and TaskStatus enumerations.
-        /// </summary>
-        private void BuildCombos()
+        public void SaveTask(ref Task existingTask, Task newTask)
         {
-            this.TaskStatuses = new string[]
-            {
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.CREATED),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.STARTED),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.DONE),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.OVERDUE),
-            };
+            TaskPriority priority = existingTask.Priority;
 
-            this.TaskPriorities = new string[]
+            // Iterate over the existing tasks and find a matching object
+            for (int idx = 0; idx < this.TaskMap[priority].Tasks.Count; ++idx)
             {
-                                Enum.GetName(typeof(TaskPriority), TaskPriority.LOW),
-                Enum.GetName(typeof(TaskPriority), TaskPriority.MEDIUM),
-                Enum.GetName(typeof(TaskPriority), TaskPriority.HIGH)
-            };
+                if (this.TaskMap[priority].Tasks[idx].Equals(existingTask))
+                {
+                    this.TaskMap[priority].Tasks[idx] = newTask;
+                    break;
+                }
+            }
+        }
+
+        public void DeleteTask(ref Task existingTask)
+        {
+            TaskPriority priority = existingTask.Priority;
+
+            // Iterate over the existing tasks and find a matching object
+            for (int idx = 0; idx < this.TaskMap[priority].Tasks.Count; ++idx)
+            {
+                if (this.TaskMap[priority].Tasks[idx].Equals(existingTask))
+                {
+                    this.TaskMap[priority].Tasks.RemoveAt(idx);
+                    break;
+                }
+            }
         }
     }
 }

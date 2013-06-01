@@ -46,7 +46,7 @@ namespace TaskOrganizer.Classes
         /// </summary>
         /// <param name="task">The task from which the fo</param>
         /// <returns>A form for the task with all properties rendered as labels.</returns>
-        public static ReadOnlyTaskForm CreateForRead(Task task)
+        public static ReadOnlyTaskForm Create(Task task)
         {
             return new ReadOnlyTaskForm(task);
         }

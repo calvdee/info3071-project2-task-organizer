@@ -27,7 +27,7 @@ namespace TaskOrganizer.Classes
         public ComboBox Priority { get { return _cBoxPriority; } }
         public RichTextBox Details { get { return _rtbDetails; } }
 
-        protected EditableTaskForm()
+        protected EditableTaskForm(Task task = null)
         {
             _txtName = BuildControl<TextBox>(0, 1, "TextInput");
             _txtDescription = BuildControl<TextBox>(1, 1, "TextInput");
@@ -36,6 +36,19 @@ namespace TaskOrganizer.Classes
             _cBoxStatus = BuildControl<ComboBox>(4, 1, "ComboInput");
             _cBoxPriority = BuildControl<ComboBox>(5, 1, "ComboInput");
             _rtbDetails = BuildControl<RichTextBox>(6, 1);
+
+            BuildComboBoxes();
+
+            if (task != null)
+            {
+                _txtName.Text = task.TaskName;
+                _txtDescription.Text = task.Description;
+                _dateStarted.SelectedDate = task.DateStarted;
+                _dateDue.SelectedDate = task.DueDate;
+                _cBoxStatus.SelectedItem = Enum.GetName(typeof(TaskStatus), task.Status);
+                _cBoxPriority.SelectedItem = Enum.GetName(typeof(TaskPriority), task.Priority);
+                _rtbDetails.AppendText(task.Details);
+            }
         }
 
         /// <summary>
@@ -46,6 +59,34 @@ namespace TaskOrganizer.Classes
         public static EditableTaskForm CreateNew()
         {
             return new EditableTaskForm();
+        }
+
+        /// <summary>
+        /// Factory method to create a new form with defaults.
+        /// </summary>
+        /// <param name="task">The task from which the fo</param>
+        /// <returns>A form for the task with all properties rendered as labels.</returns>
+        public static EditableTaskForm CreateNew(Task task)
+        {
+            return new EditableTaskForm(task);
+        }
+
+        private void BuildComboBoxes()
+        {
+            _cBoxStatus.ItemsSource = new string[]
+            {
+                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.CREATED),
+                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.STARTED),
+                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.DONE),
+                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.OVERDUE),
+            };
+
+            _cBoxPriority.ItemsSource = new string[]
+            {
+                Enum.GetName(typeof(TaskPriority), TaskPriority.LOW),
+                Enum.GetName(typeof(TaskPriority), TaskPriority.MEDIUM),
+                Enum.GetName(typeof(TaskPriority), TaskPriority.HIGH)
+            };
         }
 
         /// <summary>

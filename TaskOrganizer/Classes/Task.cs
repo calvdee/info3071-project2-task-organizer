@@ -49,7 +49,13 @@ namespace TaskOrganizer.Classes
 
         public Task()
         {
-
+            //this.TaskName = "";
+            //this.Description = "";
+            //this.DateStarted = DateTime.Today;
+            //this.DueDate = DateTime.Today;
+            //this.Status = TaskStatus.CREATED;
+            //this.Priority = TaskPriority.LOW;
+            //this.Details = "";
         }
 
         public override string ToString()
