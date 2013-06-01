@@ -56,26 +56,31 @@ namespace TaskOrganizer
                 // Create a new child node for each task in the list and set the context.
                 foreach (Classes.Task task in kvp.Value)
                 {
-                    TreeViewItem ndeName = new TreeViewItem();
-                    TreeViewItem ndeStarted = new TreeViewItem();
-                    TreeViewItem ndeDue = new TreeViewItem();
-                    TreeViewItem ndeStatus = new TreeViewItem();
+                    List<TreeViewItem> ndeChildren = new List<TreeViewItem>()
+                    {
+                        new TreeViewItem(),
+                        new TreeViewItem(),
+                        new TreeViewItem(),
+                        new TreeViewItem(),
+                        new TreeViewItem()
+                    };
                     TreeViewItem ndeSubParent = new TreeViewItem();
 
                     // Create the sub parent node and hookup the click handler
                     ndeSubParent.Header = task;
-                    ndeSubParent.MouseUp += ndeSubParent_MouseUp;
+                    ndeSubParent.MouseUp += ndeTask_MouseUp;
 
                     // Create the metadata nodes
-                    ndeStarted.Header = "Started: " + task.DateStarted.ToString(Classes.Task.DateFormat);
-                    ndeDue.Header = "Due: " + task.DueDate.ToString(Classes.Task.DateFormat);
-                    ndeStatus.Header = "Status: " + Enum.GetName(typeof(Classes.TaskStatus), task.Status);
+                    ndeChildren.ElementAt(0).Header = "Started: " + task.DateStarted.ToString(Classes.Task.DateFormat);
+                    ndeChildren.ElementAt(1).Header = "Due: " + task.DueDate.ToString(Classes.Task.DateFormat);
+                    ndeChildren.ElementAt(2).Header = "Status: " + Enum.GetName(typeof(Classes.TaskStatus), task.Status);
 
                     // Add metadata child nodes to the sub parent
-                    ndeSubParent.Items.Add(ndeName);
-                    ndeSubParent.Items.Add(ndeStarted);
-                    ndeSubParent.Items.Add(ndeDue);
-                    ndeSubParent.Items.Add(ndeStatus);
+                    ndeChildren.ForEach(c =>
+                    {
+                        ndeSubParent.Items.Add(c);
+                        c.MouseUp += ndeTask_MouseUp;
+                    });
 
                     // Add the sub parent to the parent
                     ndeParent.Items.Add(ndeSubParent);
@@ -86,9 +91,16 @@ namespace TaskOrganizer
             }
         }
 
-        void ndeSubParent_MouseUp(object sender, MouseButtonEventArgs e)
+        void ndeTask_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            throw new NotImplementedException();
+            Classes.Task task = null;
+
+            if (sender is Classes.Task)
+                // Clicked on a direct task node.
+                task = sender as Classes.Task;
+            else
+                // Clicked on a metadata node.
+                task = ((object)((sender as TreeViewItem).Parent as TreeViewItem)) as Classes.Task;
         }
 
         /// <summary>
