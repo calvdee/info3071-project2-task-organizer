@@ -23,6 +23,7 @@ namespace TaskOrganizer.Classes
 
     public class Task
     {
+        public const string DateFormat = "dddd MM, yyyy";
         public string TaskName { get; set; }
         public string Description { get; set; }
         public DateTime DateStarted { get; set; }
@@ -30,5 +31,10 @@ namespace TaskOrganizer.Classes
         public TaskStatus Status { get; set; }
         public TaskPriority Priority { get; set; }
         public string Details { get; set; }
+
+        public override string ToString()
+        {
+            return this.TaskName;
+        }
     }
 }

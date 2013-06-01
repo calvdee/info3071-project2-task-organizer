@@ -23,7 +23,9 @@ namespace TaskOrganizer
     {
         private ViewModel _vmTasks;
         private ReadOnlyTaskForm _readOnlyForm;
+        private EditableTaskForm _editableTaskForm;
         private TaskFactory _taskFactory = new TaskFactory();
+        private Dictionary<TaskPriority, List<Classes.Task>> _tree;
 
         public MainWindow()
         {
@@ -32,21 +34,61 @@ namespace TaskOrganizer
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //TaskForm form = TaskForm.CreateForRead(new Classes.Task()
-            //{
-            //    TaskName = "TestTask",
-            //    Description = "Mydesc",
-            //    DateStarted = DateTime.Today,
-            //    DueDate = DateTime.Today,
-            //    Details = "Some details blah blah",
-            //    Priority = TaskPriority.HIGH,
-            //    Status = Classes.TaskStatus.CREATED
-            //});
+            _vmTasks = new ViewModel();
+            _vmTasks.TaskCollection.CollectionChanged += TaskCollection_CollectionChanged;
+        }
 
-            //form.DetailsLabel.SetValue(Grid.ColumnSpanProperty, 2);
+        /// <summary>
+        /// Handles the addition of new tasks by re-building the tree view.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void TaskCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            treeTasks.Items.Clear();
 
-            //form.LabelCollection.ForEach(l => gridTaskDetail.Children.Add(l));
-            _vmTasks = new ViewModel();           
+            // Create a new parent node for each task priority in the TreeCollection.
+            foreach(KeyValuePair<Classes.TaskPriority, List<Classes.Task>> kvp in _vmTasks.TreeCollection)
+            {
+                TreeViewItem ndeParent = new TreeViewItem();
+                ndeParent.Header = Enum.GetName(typeof(Classes.TaskPriority), kvp.Key);
+                
+                // Create a new child node for each task in the list and set the context.
+                foreach (Classes.Task task in kvp.Value)
+                {
+                    TreeViewItem ndeName = new TreeViewItem();
+                    TreeViewItem ndeStarted = new TreeViewItem();
+                    TreeViewItem ndeDue = new TreeViewItem();
+                    TreeViewItem ndeStatus = new TreeViewItem();
+                    TreeViewItem ndeSubParent = new TreeViewItem();
+
+                    // Create the sub parent node and hookup the click handler
+                    ndeSubParent.Header = task;
+                    ndeSubParent.MouseUp += ndeSubParent_MouseUp;
+
+                    // Create the metadata nodes
+                    ndeStarted.Header = "Started: " + task.DateStarted.ToString(Classes.Task.DateFormat);
+                    ndeDue.Header = "Due: " + task.DueDate.ToString(Classes.Task.DateFormat);
+                    ndeStatus.Header = "Status: " + Enum.GetName(typeof(Classes.TaskStatus), task.Status);
+
+                    // Add metadata child nodes to the sub parent
+                    ndeSubParent.Items.Add(ndeName);
+                    ndeSubParent.Items.Add(ndeStarted);
+                    ndeSubParent.Items.Add(ndeDue);
+                    ndeSubParent.Items.Add(ndeStatus);
+
+                    // Add the sub parent to the parent
+                    ndeParent.Items.Add(ndeSubParent);
+                }
+
+                // Add to the tree view
+                treeTasks.Items.Add(ndeParent);
+            }
+        }
+
+        void ndeSubParent_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -56,29 +98,34 @@ namespace TaskOrganizer
         /// <param name="e"></param>
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
+            // Clear the read only form
             _taskFactory.StartNew(() => ClearReadOnlyForm());
 
-            EditableTaskForm form = EditableTaskForm.CreateNew();
-            form.Status.ItemsSource = _vmTasks.TaskStatuses;
-            form.Priority.ItemsSource = _vmTasks.TaskPriorities;
-            form.Details.SetValue(Grid.ColumnSpanProperty, 2);
-
+            // Create the new editable task form and set some defaults.
+            _editableTaskForm = EditableTaskForm.CreateNew();
+            _editableTaskForm.Status.ItemsSource = _vmTasks.TaskStatuses;
+            _editableTaskForm.Status.SelectedIndex = 0;
+            _editableTaskForm.Priority.ItemsSource = _vmTasks.TaskPriorities;
+            _editableTaskForm.Priority.SelectedIndex = 0;
+            _editableTaskForm.Details.SetValue(Grid.ColumnSpanProperty, 2);
+            
+            // Render the form asynchronously and setup tab indexes.
             _taskFactory.StartNew(() =>
             {
-                AddToDetailForm(form.DateDue);
-                AddToDetailForm(form.DateStarted);
-                AddToDetailForm(form.Description);
-                AddToDetailForm(form.Details);
-                AddToDetailForm(form.Name);
-                AddToDetailForm(form.Priority);
-                AddToDetailForm(form.Status);
+                AddToDetailForm(_editableTaskForm.DateDue);
+                AddToDetailForm(_editableTaskForm.DateStarted);
+                AddToDetailForm(_editableTaskForm.Description);
+                AddToDetailForm(_editableTaskForm.Details);
+                AddToDetailForm(_editableTaskForm.Name);
+                AddToDetailForm(_editableTaskForm.Priority);
+                AddToDetailForm(_editableTaskForm.Status);
 
                 Dispatcher.BeginInvoke(new Action(() => btnSave.Visibility = System.Windows.Visibility.Visible));
             })
             .ContinueWith((result) => 
             {
-                Dispatcher.BeginInvoke(new Action(() => SetTabIndexes(form)));
-                Dispatcher.BeginInvoke(new Action(() => form.Name.Focus()));
+                Dispatcher.BeginInvoke(new Action(() => SetTabIndexes(_editableTaskForm)));
+                Dispatcher.BeginInvoke(new Action(() => _editableTaskForm.Name.Focus()));
             });
         }
 
@@ -102,7 +149,8 @@ namespace TaskOrganizer
                 foreach(Label label in _readOnlyForm.LabelCollection)
                 {
                     UIElement child = null;
-                    Dispatcher.BeginInvoke(new Action(() => child = gridTaskDetail.FindName(label.Name) as UIElement));
+                    Dispatcher.BeginInvoke(new Action(() => 
+                        child = gridTaskDetail.FindName(label.Name) as UIElement));
                     gridTaskDetail.Children.Remove(child);
                 }
             }
@@ -121,6 +169,38 @@ namespace TaskOrganizer
             form.Status.TabIndex = 4;
             form.Priority.TabIndex = 5;
             form.Details.TabIndex = 6;
+        }
+
+        /// <summary>
+        /// Handles the save by creating a new task object will cause view model events to fire and
+        /// the new task will be renedered in the tree view and persisted to the disk.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            Classes.TaskStatus status = (Classes.TaskStatus)Enum.Parse(
+                    typeof(Classes.TaskStatus), 
+                    _editableTaskForm.Status.SelectedItem.ToString());
+
+            Classes.TaskPriority priority = (Classes.TaskPriority)Enum.Parse(
+                    typeof(Classes.TaskPriority), 
+                    _editableTaskForm.Priority.SelectedItem.ToString());
+
+            Classes.Task newTask = new Classes.Task()
+            {
+                TaskName = _editableTaskForm.Name.Text,
+                DateStarted = _editableTaskForm.DateStarted.SelectedDate ?? DateTime.Today,
+                DueDate = _editableTaskForm.DateDue.SelectedDate ?? DateTime.Today,
+                Description = _editableTaskForm.Description.Text,
+                Details = new TextRange(
+                    _editableTaskForm.Details.Document.ContentStart, 
+                    _editableTaskForm.Details.Document.ContentEnd).Text,
+                Priority = priority,
+                Status = status
+            };
+
+            _vmTasks.SaveTask(newTask);
         }
     }
 }

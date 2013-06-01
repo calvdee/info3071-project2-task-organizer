@@ -30,25 +30,9 @@
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
             <TreeView Name="treeTasks" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top"
                       FontSize="14" BorderThickness="0" Margin="5">
-                <TreeViewItem Name="parDueDate1" Header="Monday May 20, 2013">
-                    <TreeViewItem Name="ndeTask1" Header="My Big Project"></TreeViewItem>
-                </TreeViewItem>
-                <TreeViewItem Name="parDueDate2" Header="Wednesday May 29, 2013">
-                    <TreeViewItem Name="ndeTas2" Header="My Big Project"></TreeViewItem>
-                </TreeViewItem>
-                <TreeViewItem Name="parDueDate3" Header="Monday May 20, 2013">
-                    <TreeViewItem Name="ndeTask3" Header="My Big Project"></TreeViewItem>
-                </TreeViewItem>
-                <TreeViewItem Name="parDueDate4" Header="Wednesday May 29, 2013">
-                    <TreeViewItem Name="ndeTas4" Header="My Big Project"></TreeViewItem>
-                </TreeViewItem>
-                <TreeViewItem Name="parDueDate5" Header="Monday May 20, 2013">
-                    <TreeViewItem Name="ndeTask5" Header="My Big Project"></TreeViewItem>
-                </TreeViewItem>
-                <TreeViewItem Name="parDueDate6" Header="Wednesday May 29, 2013">
-                    <TreeViewItem Name="ndeTas6" Header="My Big Project"></TreeViewItem>
-                </TreeViewItem>
             </TreeView>
+            
+            <!-- ACTION BUTTONS -->
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Name="btnRemove" Margin="5" FontSize="12">Remove</Button>
                 <Button Name="btnEdit" Margin="5" FontSize="12">Edit</Button>
@@ -97,7 +81,7 @@
         </Grid>
         
         <Button Name="btnSave" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Right" 
-                Margin="5 5 15 5" MinWidth="100" Visibility="Hidden">Save</Button>
+                Margin="5 5 15 5" MinWidth="100" Visibility="Hidden" Click="btnSave_Click">Save</Button>
         
     </Grid>
 </Window>

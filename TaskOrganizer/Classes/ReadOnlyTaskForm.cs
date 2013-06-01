@@ -33,8 +33,8 @@ namespace TaskOrganizer.Classes
             _labelCollection = new List<Label>();
             _lblName = BuildLabel(task.TaskName, 0, 1);
             _lblDescription = BuildLabel(task.Description, 1, 1);
-            _lblDateStarted = BuildLabel(task.DateStarted.ToString("dddd MM, yyyy"), 2, 1);
-            _lblDateDue = BuildLabel(task.DueDate.ToString("dddd MM, yyyy"), 3, 1);
+            _lblDateStarted = BuildLabel(task.DateStarted.ToString(Task.DateFormat), 2, 1);
+            _lblDateDue = BuildLabel(task.DueDate.ToString(Task.DateFormat), 3, 1);
             _lblStatus = BuildLabel(Enum.GetName(typeof(TaskStatus), task.Status), 4, 1);
             _lblPriority = BuildLabel(Enum.GetName(typeof(TaskPriority), task.Priority), 5, 1);
             _lblDetails = BuildLabel(task.Details, 6, 1);
