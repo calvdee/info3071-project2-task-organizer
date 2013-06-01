@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace TaskOrganizer.Classes
 {
-    public class TaskForm
+    public class ReadOnlyTaskForm
     {
         private Label _lblName;
         private Label _lblDescription;
@@ -28,7 +28,7 @@ namespace TaskOrganizer.Classes
         public Label PriorityLabel { get { return _lblPriority; } }
         public Label DetailsLabel { get { return _lblDetails; } }
 
-        protected TaskForm(Task task)
+        protected ReadOnlyTaskForm(Task task)
         {
             _labelCollection = new List<Label>();
             _lblName = BuildLabel(task.TaskName, 0, 1);
@@ -46,9 +46,9 @@ namespace TaskOrganizer.Classes
         /// </summary>
         /// <param name="task">The task from which the fo</param>
         /// <returns>A form for the task with all properties rendered as labels.</returns>
-        public static TaskForm CreateForRead(Task task)
+        public static ReadOnlyTaskForm CreateForRead(Task task)
         {
-            return new TaskForm(task);
+            return new ReadOnlyTaskForm(task);
         }
 
         /// <summary>
@@ -70,4 +70,6 @@ namespace TaskOrganizer.Classes
             return label;
         }
     }
+
+
 }

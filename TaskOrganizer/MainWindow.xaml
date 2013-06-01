@@ -23,7 +23,9 @@
                    FontSize="16" FontWeight="Light" BorderBrush="Black" BorderThickness="0 0 0 0.25">List</Label>
         <Label Name="lblTaskDetail" Grid.Row="1" Grid.Column="1" Margin="5 5 5 5"
                    FontSize="16" FontWeight="Light" BorderBrush="Black" BorderThickness="0 0 0 0.25">Detail</Label>
-        
+
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Height="100" Margin="0,21,0,0" Grid.Row="2" VerticalAlignment="Top" Width="5"/>
+
         <!-- TASK LIST -->
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
             <TreeView Name="treeTasks" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top"
@@ -50,7 +52,7 @@
             <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Name="btnRemove" Margin="5" FontSize="12">Remove</Button>
                 <Button Name="btnEdit" Margin="5" FontSize="12">Edit</Button>
-                <Button Name="btnAdd" Margin="5" FontSize="12">New</Button>
+                <Button Name="btnAdd" Margin="5" FontSize="12" Click="btnAdd_Click">New</Button>
             </WrapPanel>
         </StackPanel>
         
@@ -73,33 +75,29 @@
             
             <!-- TASK FORM -->
             <Label Name="lblForName" Grid.Row="0" Grid.Column="0" Style="{StaticResource ForLabel}">Name:</Label>
-            <TextBox Name="txtName" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextInput}"></TextBox>
+            <!--<TextBox Name="txtName" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextInput}"></TextBox>-->
             
             <Label Name="lblForDesc" Grid.Row="1" Grid.Column="0" Style="{StaticResource ForLabel}">Description:</Label>
-            <TextBox Name="txtDesc" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextInput}"></TextBox>
+            <!--<TextBox Name="txtDesc" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextInput}"></TextBox>-->
             
             <Label Name="lblForStarted" Grid.Row="2" Grid.Column="0" Style="{StaticResource ForLabel}">Date Started:</Label>
-            <DatePicker Name="dateStarted" Grid.Row="2" Grid.Column="1" Style="{StaticResource DateInput}"></DatePicker>
+            <!--<DatePicker Name="dateStarted" Grid.Row="2" Grid.Column="1" Style="{StaticResource DateInput}"></DatePicker>-->
             
             <Label Name="lblForDue" Grid.Row="3" Grid.Column="0" Style="{StaticResource ForLabel}">Date Due:</Label>
-            <DatePicker Name="dateDue" Grid.Row="3" Grid.Column="1" Style="{StaticResource DateInput}"></DatePicker>
+            <!--<DatePicker Name="dateDue" Grid.Row="3" Grid.Column="1" Style="{StaticResource DateInput}"></DatePicker>-->
 
             <Label Name="lblForStatus" Grid.Row="4" Grid.Column="0" Style="{StaticResource ForLabel}">Status:</Label>
-            <ComboBox Name="cmbStatus" Grid.Row="4" Grid.Column="1" Style="{StaticResource ComboInput}"></ComboBox>
+            <!--<ComboBox Name="cBoxStatus" Grid.Row="4" Grid.Column="1" Style="{StaticResource ComboInput}"></ComboBox>-->
 
             <Label Name="lblForPriority" Grid.Row="5" Grid.Column="0" Style="{StaticResource ForLabel}">Priority:</Label>
-            <ComboBox Name="cmbPriority" Grid.Row="5" Grid.Column="1" Style="{StaticResource ComboInput}"></ComboBox>
+            <!--<ComboBox Name="cBoxPriority" Grid.Row="5" Grid.Column="1" Style="{StaticResource ComboInput}"></ComboBox>-->
 
             <Label Name="lblForDetails" Grid.Row="6" Grid.Column="0" Style="{StaticResource ForLabel}">Details:</Label>
-            <RichTextBox Name="rtfDetails" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Stretch"></RichTextBox>
-            
-            <!-- TASK ACTIONS -->
-            <!--<StackPanel Name="stkActions" Grid.Row="10" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Label Name="lblActions" FontSize="12" VerticalAlignment="Center" FontWeight="SemiBold">Actions:</Label>
-                <Button Name="btnEdit" Margin="5" FontSize="12">Edit</Button>
-                <Button Name="btnDelete" Margin="5" FontSize="12">Delete</Button>
-            </StackPanel>-->
+            <!--<RichTextBox Name="rtfDetails" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Stretch"></RichTextBox>-->    
         </Grid>
-        <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Height="100" Margin="0,21,0,0" Grid.Row="2" VerticalAlignment="Top" Width="5"/>
+        
+        <Button Name="btnSave" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Right" 
+                Margin="5 5 15 5" MinWidth="100" Visibility="Hidden">Save</Button>
+        
     </Grid>
 </Window>
