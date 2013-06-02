@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,7 +11,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TaskOrganizer.Classes;
+using TaskOrganizer.Tasks;
+using TaskOrganizer.Tasks.Forms;
+using TaskOrganizer.ViewModels;
 
 namespace TaskOrganizer
 {
@@ -23,9 +24,9 @@ namespace TaskOrganizer
     {
         private AppViewModel _vmTasks;
         private EditableTaskForm _editableTaskForm;
-        private TaskFactory _taskFactory = new TaskFactory();
+        private System.Threading.Tasks.TaskFactory _taskFactory = new System.Threading.Tasks.TaskFactory();
         private List<Label> _forLabels = new List<Label>();
-        private Classes.Task _selectedTask = null;
+        private TaskViewModel _selectedTask = null;
 
         public MainWindow()
         {
@@ -93,7 +94,7 @@ namespace TaskOrganizer
         /// Builds a form with input controls and sets default content if there is task.
         /// </summary>
         /// <param name="task">The task used to create default values for the controls.</param>
-        private void BuildEditableForm(Classes.Task task = null)
+        private void BuildEditableForm(TaskViewModel task = null)
         {
             // Create the new editable task form and set some defaults.
             if (task == null)
@@ -110,6 +111,7 @@ namespace TaskOrganizer
             _editableTaskForm.Details.SetValue(Grid.ColumnSpanProperty, 2);
             _editableTaskForm.DateStarted.SelectedDateFormat = DatePickerFormat.Long;
             _editableTaskForm.DateDue.SelectedDateFormat = DatePickerFormat.Long;
+            _editableTaskForm.Details.TextWrapping = TextWrapping.Wrap;
 
             // Render the form asynchronously and setup tab indexes.
             _taskFactory.StartNew(() =>
@@ -137,7 +139,7 @@ namespace TaskOrganizer
         /// Builds a form for the task, rendering all of the fields as labels.
         /// </summary>
         /// <param name="?"></param>
-        private void BuildReadOnlyForm(Classes.Task task)
+        private void BuildReadOnlyForm(TaskViewModel task)
         {
             ReadOnlyTaskForm form = ReadOnlyTaskForm.Create(task);
 
@@ -149,43 +151,6 @@ namespace TaskOrganizer
         #endregion
 
         #region UI Events
-
-        /// <summary>
-        /// Handles the WindowLoaded event by creating the application's view model and setting
-        /// some properties.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            _vmTasks = new AppViewModel();
-
-            _forLabels = new List<Label>()
-            {
-                new Label() { Content = "Name: " },
-                new Label() { Content = "Description: " },
-                new Label() { Content = "Date Started: " },
-                new Label() { Content = "Date Due: " },
-                new Label() { Content = "Status: " },
-                new Label() { Content = "Priority: " },
-                new Label() { Content = "Details: " },
-            };
-
-            // Build up the task lists from the view model's `TaskMap`, one for each priority
-            List<TaskList> priorities = new List<TaskList>() 
-            { 
-                _vmTasks.TaskMap[TaskPriority.LOW], 
-                _vmTasks.TaskMap[TaskPriority.MEDIUM], 
-                _vmTasks.TaskMap[TaskPriority.HIGH] 
-            };
-
-            DataContext = new
-            {
-                Priorities = priorities
-            };
-
-            BuildForLabels();
-        }
 
         /// <summary>
         /// Asynchronously creates a new EditableTaskForm.
@@ -209,29 +174,17 @@ namespace TaskOrganizer
         /// <param name="e"></param>
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            // Create stringified status
-            Classes.TaskStatus status = (Classes.TaskStatus)Enum.Parse(
-                    typeof(Classes.TaskStatus), 
-                    _editableTaskForm.Status.SelectedItem.ToString());
-
-            // Create stringified priority
-            Classes.TaskPriority priority = (Classes.TaskPriority)Enum.Parse(
-                    typeof(Classes.TaskPriority), 
-                    _editableTaskForm.Priority.SelectedItem.ToString());
-
             // Create Task instance
-            Classes.Task newTask = new Classes.Task()
+            TaskViewModel newTask = TaskViewModel.FromTask(new Task()
             {
                 TaskName = _editableTaskForm.Name.Text,
-                DateStarted = _editableTaskForm.DateStarted.SelectedDate ?? DateTime.Today,
-                DueDate = _editableTaskForm.DateDue.SelectedDate ?? DateTime.Today,
+                DateStarted = DateTime.Parse(_editableTaskForm.DateStarted.SelectedDate.ToString()).ToString(Task.DateFormat),
+                DueDate = DateTime.Parse(_editableTaskForm.DateDue.SelectedDate.ToString()).ToString(Task.DateFormat),
                 Description = _editableTaskForm.Description.Text,
-                Details = new TextRange(
-                    _editableTaskForm.Details.Document.ContentStart, 
-                    _editableTaskForm.Details.Document.ContentEnd).Text,
-                Priority = priority,
-                Status = status
-            };
+                Details = _editableTaskForm.Details.Text,
+                Priority = _editableTaskForm.Priority.SelectedItem.ToString(),
+                Status = _editableTaskForm.Status.SelectedItem.ToString()
+            });
 
             // Save the task
             if (_selectedTask == null)
@@ -282,7 +235,7 @@ namespace TaskOrganizer
         /// <param name="e"></param>
         private void ndeTask_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            Classes.Task task = (sender as TextBlock).DataContext as TaskOrganizer.Classes.Task;
+            TaskViewModel task = (sender as TextBlock).DataContext as TaskViewModel;
 
             _taskFactory.StartNew(() => ClearForm());
 
@@ -311,6 +264,8 @@ namespace TaskOrganizer
                 _taskFactory.StartNew(() => ClearForm());
                 BuildEditableForm();
             }
+
+            btnEdit.Visibility = System.Windows.Visibility.Hidden;
         }
 
         /// <summary>
@@ -336,9 +291,70 @@ namespace TaskOrganizer
                     _vmTasks.DeleteTask(ref _selectedTask);
                     _taskFactory.StartNew(new Action(() => ClearForm()));
                 }
+
+                _selectedTask = null;
+                btnRemove.IsEnabled = false;
             }
         }
 
+        /// <summary>
+        /// Handles a node losing focus by resetting the selected task.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TextBlock_LostFocus(object sender, RoutedEventArgs e)
+        {
+            _selectedTask = null;
+            btnRemove.IsEnabled = false;
+        }
+
         #endregion
+
+        /// <summary>
+        /// Handles the WindowLoaded event by creating the application's view model and setting
+        /// some properties.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            _vmTasks = new AppViewModel();
+
+            _forLabels = new List<Label>()
+            {
+                new Label() { Content = "Name: " },
+                new Label() { Content = "Description: " },
+                new Label() { Content = "Date Started: " },
+                new Label() { Content = "Date Due: " },
+                new Label() { Content = "Status: " },
+                new Label() { Content = "Priority: " },
+                new Label() { Content = "Details: " },
+            };
+
+            // Build up the task lists from the view model's `TaskMap`, one for each priority
+            List<TaskList> priorities = new List<TaskList>() 
+            { 
+                _vmTasks.TaskMap[TaskPriority.LOW], 
+                _vmTasks.TaskMap[TaskPriority.MEDIUM], 
+                _vmTasks.TaskMap[TaskPriority.HIGH] 
+            };
+
+            DataContext = new
+            {
+                Priorities = priorities
+            };
+
+            BuildForLabels();
+        }
+
+        /// <summary>
+        /// Handles the WindowClosing event by persisting the tasks to disk.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _vmTasks.DumpToDisk();
+        }
     }
 }

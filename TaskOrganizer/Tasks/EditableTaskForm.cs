@@ -5,9 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using TaskOrganizer.ViewModels;
+using System.Globalization;
 
-namespace TaskOrganizer.Classes
+namespace TaskOrganizer.Tasks
 {
+    /// <summary>
+    /// Class used to create a form that allows for editing.  All controls are Content controls.
+    /// </summary>
     public class EditableTaskForm
     {
         private TextBox _txtName;
@@ -16,8 +21,7 @@ namespace TaskOrganizer.Classes
         private DatePicker _dateDue;
         private ComboBox _cBoxStatus;
         private ComboBox _cBoxPriority;
-        private RichTextBox _rtbDetails;
-        private Button _btnSave;
+        private TextBox txtDetails;
 
         public TextBox Name { get { return _txtName; } }
         public TextBox Description { get { return _txtDescription; } }
@@ -25,9 +29,9 @@ namespace TaskOrganizer.Classes
         public DatePicker DateDue { get { return _dateDue; } }
         public ComboBox Status { get { return _cBoxStatus; } }
         public ComboBox Priority { get { return _cBoxPriority; } }
-        public RichTextBox Details { get { return _rtbDetails; } }
+        public TextBox Details { get { return txtDetails; } }
 
-        protected EditableTaskForm(Task task = null)
+        protected EditableTaskForm(TaskViewModel task = null)
         {
             _txtName = BuildControl<TextBox>(0, 1, "TextInput");
             _txtDescription = BuildControl<TextBox>(1, 1, "TextInput");
@@ -35,7 +39,7 @@ namespace TaskOrganizer.Classes
             _dateDue = BuildControl<DatePicker>(3, 1, "DateInput");
             _cBoxStatus = BuildControl<ComboBox>(4, 1, "ComboInput");
             _cBoxPriority = BuildControl<ComboBox>(5, 1, "ComboInput");
-            _rtbDetails = BuildControl<RichTextBox>(6, 1);
+            txtDetails = BuildControl<TextBox>(6, 1);
 
             BuildComboBoxes();
 
@@ -43,11 +47,11 @@ namespace TaskOrganizer.Classes
             {
                 _txtName.Text = task.TaskName;
                 _txtDescription.Text = task.Description;
-                _dateStarted.SelectedDate = task.DateStarted;
-                _dateDue.SelectedDate = task.DueDate;
-                _cBoxStatus.SelectedItem = Enum.GetName(typeof(TaskStatus), task.Status);
-                _cBoxPriority.SelectedItem = Enum.GetName(typeof(TaskPriority), task.Priority);
-                _rtbDetails.AppendText(task.Details);
+                _dateStarted.SelectedDate = DateTime.Parse(task.DateStarted);
+                _dateDue.SelectedDate = DateTime.Parse(task.DueDate);
+                _cBoxStatus.SelectedItem = task.Status;
+                _cBoxPriority.SelectedItem = task.Priority;
+                txtDetails.AppendText(task.Details);
             }
         }
 
@@ -66,19 +70,22 @@ namespace TaskOrganizer.Classes
         /// </summary>
         /// <param name="task">The task from which the fo</param>
         /// <returns>A form for the task with all properties rendered as labels.</returns>
-        public static EditableTaskForm CreateNew(Task task)
+        public static EditableTaskForm CreateNew(TaskViewModel task)
         {
             return new EditableTaskForm(task);
         }
 
+        /// <summary>
+        /// Creates the comobo boxes for TaskPriority and TaskStatus enumerations.
+        /// </summary>
         private void BuildComboBoxes()
         {
             _cBoxStatus.ItemsSource = new string[]
             {
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.CREATED),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.STARTED),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.DONE),
-                Enum.GetName(typeof(Classes.TaskStatus), Classes.TaskStatus.OVERDUE),
+                Enum.GetName(typeof(TaskStatus), TaskStatus.CREATED),
+                Enum.GetName(typeof(TaskStatus), TaskStatus.STARTED),
+                Enum.GetName(typeof(TaskStatus), TaskStatus.DONE),
+                Enum.GetName(typeof(TaskStatus), TaskStatus.OVERDUE),
             };
 
             _cBoxPriority.ItemsSource = new string[]

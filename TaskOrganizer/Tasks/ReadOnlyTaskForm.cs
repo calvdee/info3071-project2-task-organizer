@@ -5,9 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using TaskOrganizer.ViewModels;
 
-namespace TaskOrganizer.Classes
+namespace TaskOrganizer.Tasks.Forms
 {
+    /// <summary>
+    /// Class used to create read only forms consisting of values as Labels.
+    /// </summary>
     public class ReadOnlyTaskForm
     {
         private Label _lblName;
@@ -28,15 +32,15 @@ namespace TaskOrganizer.Classes
         public Label PriorityLabel { get { return _lblPriority; } }
         public Label DetailsLabel { get { return _lblDetails; } }
 
-        protected ReadOnlyTaskForm(Task task)
+        protected ReadOnlyTaskForm(TaskViewModel task)
         {
             _labelCollection = new List<Label>();
             _lblName = BuildLabel(task.TaskName, 0, 1);
             _lblDescription = BuildLabel(task.Description, 1, 1);
-            _lblDateStarted = BuildLabel(task.DateStarted.ToString(Task.DateFormat), 2, 1);
-            _lblDateDue = BuildLabel(task.DueDate.ToString(Task.DateFormat), 3, 1);
-            _lblStatus = BuildLabel(Enum.GetName(typeof(TaskStatus), task.Status), 4, 1);
-            _lblPriority = BuildLabel(Enum.GetName(typeof(TaskPriority), task.Priority), 5, 1);
+            _lblDateStarted = BuildLabel(DateTime.Parse(task.DateStarted).ToString(Task.DateFormat), 2, 1);
+            _lblDateDue = BuildLabel(DateTime.Parse(task.DueDate).ToString(Task.DateFormat), 3, 1);
+            _lblStatus = BuildLabel(task.Status, 4, 1);
+            _lblPriority = BuildLabel(task.Priority, 5, 1);
             _lblDetails = BuildLabel(task.Details, 6, 1);
         }
 
@@ -46,7 +50,7 @@ namespace TaskOrganizer.Classes
         /// </summary>
         /// <param name="task">The task from which the fo</param>
         /// <returns>A form for the task with all properties rendered as labels.</returns>
-        public static ReadOnlyTaskForm Create(Task task)
+        public static ReadOnlyTaskForm Create(TaskViewModel task)
         {
             return new ReadOnlyTaskForm(task);
         }
